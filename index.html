@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucronium</title>
+<style>
+  :root {
+    --fondo: #0f1320;
+    --panel: #171c2e;
+    --panel-2: #1e2540;
+    --borde: #28304d;
+    --texto: #e8ebf5;
+    --suave: #8b94b3;
+    --acento: #e8b64c;
+    --ok: #4cc38a;
+    --error: #ef6b6b;
+    --radio: 14px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --fondo: #f6f3ec;
+      --panel: #ffffff;
+      --panel-2: #f1ece0;
+      --borde: #e3dcc9;
+      --texto: #1d2233;
+      --suave: #6a7186;
+      --acento: #b57b0f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45;
+  }
+  .contenedor { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+  /* Cabecera */
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0 18px; }
+  h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 1.9rem; letter-spacing: .04em; color: var(--acento); }
+  .estado { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--suave); }
+  .punto-estado { width: 10px; height: 10px; border-radius: 50%; background: var(--suave); flex: none; }
+  .punto-estado.ok { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); }
+  .punto-estado.error { background: var(--error); }
+  .punto-estado.demo { background: var(--acento); }
+  .aviso-demo { background: var(--panel-2); border: 1px dashed var(--acento); color: var(--texto); border-radius: var(--radio); padding: 10px 14px; margin-bottom: 18px; font-size: .9rem; }
+  .aviso-demo code { background: var(--panel); padding: 1px 6px; border-radius: 6px; }
+
+  section { margin-bottom: 30px; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .14em; color: var(--suave); margin: 0 0 12px; font-weight: 600; }
+  .vacio-msg { color: var(--suave); font-size: .9rem; padding: 12px 0; }
+
+  /* Contadores */
+  .contadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .contador { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px 18px; position: relative; overflow: hidden; }
+  .contador .icono { font-size: 1.5rem; }
+  .contador .nombre { color: var(--suave); font-size: .85rem; margin-top: 4px; }
+  .contador .cifra { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; }
+  .contador .valor { font-size: 2.4rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .contador .unidad { color: var(--acento); font-size: 1.1rem; font-weight: 600; }
+  .contador.sube { animation: destello-sube 1.1s ease-out; }
+  .contador.baja { animation: destello-baja 1.1s ease-out; }
+  @keyframes destello-sube { 0% { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 22%, var(--panel)); } 100% { border-color: var(--borde); background: var(--panel); } }
+  @keyframes destello-baja { 0% { border-color: var(--error); background: color-mix(in srgb, var(--error) 22%, var(--panel)); } 100% { border-color: var(--borde); background: var(--panel); } }
+
+  /* Calendario */
+  .calendario-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; }
+  @media (max-width: 760px) { .calendario-layout { grid-template-columns: 1fr; } }
+  .caja { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px; }
+  .cal-cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+  .cal-cabecera .mes { font-weight: 600; }
+  .cal-cabecera .mes::first-letter, .detalle-titulo::first-letter { text-transform: uppercase; }
+  .cal-botones { display: flex; gap: 6px; }
+  button { font: inherit; color: inherit; }
+  .btn { background: var(--panel-2); border: 1px solid var(--borde); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
+  .btn:hover { border-color: var(--acento); }
+  .cuadricula { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .dsem { text-align: center; font-size: .75rem; color: var(--suave); padding: 4px 0; }
+  .dia { aspect-ratio: 1 / 1; background: transparent; border: 1px solid transparent; border-radius: 10px; cursor: pointer; position: relative; font-variant-numeric: tabular-nums; }
+  .dia.vacio { cursor: default; }
+  .dia:not(.vacio):hover { background: var(--panel-2); }
+  .dia.hoy { border-color: var(--acento); color: var(--acento); font-weight: 700; }
+  .dia.sel { background: var(--acento); color: #1a1405; font-weight: 700; }
+  .dia .punto { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--acento); }
+  .dia.sel .punto { background: #1a1405; }
+  .evento { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+  .evento:last-child { border-bottom: 0; }
+  .evento .fecha { min-width: 64px; font-size: .8rem; color: var(--acento); text-transform: capitalize; font-weight: 600; }
+  .evento .titulo { font-weight: 600; }
+  .evento .desc { color: var(--suave); font-size: .88rem; }
+  .detalle-titulo { font-weight: 600; margin-bottom: 4px; }
+
+  /* Minifiguras */
+  .fig-cabecera { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+  .fig-cabecera h2 { margin: 0; }
+  #filtro { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 7px 12px; color: var(--texto); font: inherit; min-width: 200px; }
+  #filtro:focus { outline: none; border-color: var(--acento); }
+  .figuras { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .figura { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); overflow: hidden; }
+  .figura .foto { aspect-ratio: 1 / 1; width: 100%; display: block; object-fit: cover; background: var(--panel-2); }
+  .figura .sin-foto { aspect-ratio: 1 / 1; display: grid; place-items: center; background: var(--panel-2); color: var(--acento); font-family: Georgia, serif; font-size: 2.6rem; }
+  .figura .info { padding: 10px 12px 12px; }
+  .figura .fnombre { font-weight: 600; }
+  .figura .fnotas { color: var(--suave); font-size: .85rem; margin-top: 2px; }
+
+  footer { color: var(--suave); font-size: .8rem; text-align: center; padding: 8px 0 24px; }
+</style>
+</head>
+<body>
+<div class="contenedor">
+
+  <header>
+    <h1 id="titulo">Lucronium</h1>
+    <div class="estado"><span id="estadoPunto" class="punto-estado"></span><span id="estadoTexto">Cargando…</span></div>
+  </header>
+
+  <div id="avisoDemo" class="aviso-demo" hidden>
+    <strong>Modo demostración.</strong> Estás viendo datos de ejemplo. Pega la URL de tu API en la constante
+    <code>API_URL</code> (al principio del script, al final de este archivo) para ver los datos de tu hoja de cálculo.
+  </div>
+
+  <section>
+    <h2>Recursos</h2>
+    <div id="contadores" class="contadores"></div>
+    <div id="contadoresVacio" class="vacio-msg" hidden>No hay contadores. Añade filas en la pestaña «Recursos» de la hoja.</div>
+  </section>
+
+  <section>
+    <h2>Calendario</h2>
+    <div class="calendario-layout">
+      <div class="caja">
+        <div class="cal-cabecera">
+          <span id="mesTitulo" class="mes"></span>
+          <div class="cal-botones">
+            <button class="btn" id="mesAnterior" type="button" aria-label="Mes anterior">‹</button>
+            <button class="btn" id="mesHoy" type="button">Hoy</button>
+            <button class="btn" id="mesSiguiente" type="button" aria-label="Mes siguiente">›</button>
+          </div>
+        </div>
+        <div id="cuadricula" class="cuadricula"></div>
+      </div>
+      <div class="caja" id="detalle"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="fig-cabecera">
+      <h2 id="figTitulo">Minifiguras</h2>
+      <input id="filtro" type="search" placeholder="Buscar por nombre…" autocomplete="off">
+    </div>
+    <div id="figuras" class="figuras"></div>
+    <div id="figurasVacio" class="vacio-msg" hidden></div>
+  </section>
+
+  <footer>Datos leídos de Google Sheets · se actualizan solos</footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN  ← lo único que tienes que tocar
+   ============================================================ */
+
+// Pega aquí la URL de tu aplicación web de Apps Script (termina en /exec).
+// Mientras no la cambies, la página funciona en modo demostración.
+const API_URL = "PEGA_AQUI_LA_URL_DE_TU_APP_WEB";
+
+// Cada cuántos segundos se comprueban cambios en la hoja.
+const SEGUNDOS_ENTRE_ACTUALIZACIONES = 20;
+
+// Título de la página.
+const TITULO = "Lucronium";
+
+/* ============================================================
+   A partir de aquí no hace falta tocar nada
+   ============================================================ */
+
+const DEMO = API_URL.startsWith("PEGA_AQUI");
+
+const $ = (s) => document.querySelector(s);
+
+// Crea elementos DOM de forma segura: el texto de la hoja nunca se interpreta como HTML.
+function h(tag, attrs = {}, ...hijos) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  hijos.flat().forEach((c) => { if (c != null) el.append(c); });
+  return el;
+}
+
+/* ---------- Utilidades de fecha y formato ---------- */
+
+function fechaISO(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function dateDeISO(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+// Acepta 2026-11-20 o 20/11/2026 (por si alguien escribe la fecha como texto en la hoja).
+function normalizarFecha(v) {
+  const s = String(v == null ? "" : v).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  return "";
+}
+// "de-DE" da el mismo formato que España pero agrupa también los miles de 4 cifras (1.234).
+const formatoNumero = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
+
+/* ---------- Datos de demostración ---------- */
+
+const hoyDemo = new Date();
+const enDias = (n) => fechaISO(new Date(hoyDemo.getFullYear(), hoyDemo.getMonth(), hoyDemo.getDate() + n));
+const DATOS_DEMO = {
+  recursos: [
+    { nombre: "Dinero", valor: 12450, unidad: "€", icono: "💰" },
+    { nombre: "Minifiguras", valor: 3, unidad: "", icono: "🧍" },
+    { nombre: "Materiales", valor: 320, unidad: "uds", icono: "🧱" },
+  ],
+  minifiguras: [
+    { nombre: "Capitán Aldric", foto: "", notas: "Líder de la expedición" },
+    { nombre: "Mara la Exploradora", foto: "", notas: "Especialista en mapas" },
+    { nombre: "Bram el Herrero", foto: "", notas: "Encargado de materiales" },
+  ],
+  eventos: [
+    { fecha: enDias(2), titulo: "Reunión de editores", descripcion: "Repaso de recursos y planes" },
+    { fecha: enDias(5), titulo: "Expedición al norte", descripcion: "Salida a las 10:00" },
+    { fecha: enDias(12), titulo: "Fin de temporada", descripcion: "Recuento final" },
+  ],
+};
+
+/* ---------- Estado de la página ---------- */
+
+let recursos = [], figuras = [], eventos = [];
+let eventosPorDia = new Map();
+const hoyISO = fechaISO(new Date());
+let vista = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let seleccion = null;
+
+/* ---------- Contadores ---------- */
+
+const tarjetas = new Map();
+
+function crearTarjeta() {
+  const icono = h("div", { class: "icono" });
+  const nombre = h("div", { class: "nombre" });
+  const valor = h("span", { class: "valor" });
+  const unidad = h("span", { class: "unidad" });
+  const el = h("div", { class: "contador" }, icono, nombre, h("div", { class: "cifra" }, valor, unidad));
+  el.addEventListener("animationend", () => el.classList.remove("sube", "baja"));
+  return { el, icono, nombre, valor, unidad, actual: null, raf: 0 };
+}
+
+function animarNumero(t, bruto) {
+  const n = typeof bruto === "number" ? bruto : Number(String(bruto).replace(",", "."));
+  if (bruto === "" || bruto == null || !Number.isFinite(n)) {
+    t.actual = null;
+    t.valor.textContent = bruto === "" || bruto == null ? "—" : String(bruto);
+    return;
+  }
+  const origen = t.actual;
+  t.actual = n;
+  const sinAnimacion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (origen == null || origen === n || sinAnimacion) {
+    t.valor.textContent = formatoNumero.format(n);
+    return;
+  }
+  cancelAnimationFrame(t.raf);
+  t.el.classList.remove("sube", "baja");
+  void t.el.offsetWidth; // reinicia la animación CSS
+  t.el.classList.add(n > origen ? "sube" : "baja");
+  const inicio = performance.now(), duracion = 700;
+  const paso = (ahora) => {
+    const p = Math.min(1, (ahora - inicio) / duracion);
+    const suave = 1 - Math.pow(1 - p, 3);
+    t.valor.textContent = formatoNumero.format(origen + (n - origen) * suave);
+    if (p < 1) t.raf = requestAnimationFrame(paso);
+  };
+  t.raf = requestAnimationFrame(paso);
+}
+
+function pintarRecursos() {
+  const cont = $("#contadores");
+  const vistos = new Set();
+  recursos.forEach((r) => {
+    const clave = String(r.nombre);
+    vistos.add(clave);
+    let t = tarjetas.get(clave);
+    if (!t) { t = crearTarjeta(); tarjetas.set(clave, t); }
+    cont.appendChild(t.el); // mantiene el orden de la hoja
+    t.icono.textContent = r.icono || "◆";
+    t.nombre.textContent = r.nombre;
+    t.unidad.textContent = r.unidad || "";
+    animarNumero(t, r.valor);
+  });
+  for (const [clave, t] of tarjetas) {
+    if (!vistos.has(clave)) { t.el.remove(); tarjetas.delete(clave); }
+  }
+  $("#contadoresVacio").hidden = recursos.length > 0;
+}
+
+/* ---------- Calendario ---------- */
+
+function pintarCalendario() {
+  const y = vista.getFullYear(), m = vista.getMonth();
+  $("#mesTitulo").textContent = vista.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+  const grid = $("#cuadricula");
+  grid.replaceChildren();
+  ["L", "M", "X", "J", "V", "S", "D"].forEach((d) => grid.append(h("div", { class: "dsem" }, d)));
+  const hueco = (new Date(y, m, 1).getDay() + 6) % 7; // la semana empieza en lunes
+  const dias = new Date(y, m + 1, 0).getDate();
+  for (let i = 0; i < hueco; i++) grid.append(h("div", { class: "dia vacio" }));
+  for (let d = 1; d <= dias; d++) {
+    const iso = fechaISO(new Date(y, m, d));
+    const evs = eventosPorDia.get(iso) || [];
+    const clases = ["dia", iso === hoyISO ? "hoy" : "", iso === seleccion ? "sel" : ""].filter(Boolean).join(" ");
+    const celda = h("button", {
+      class: clases, type: "button",
+      "aria-label": `${d}${evs.length ? `, ${evs.length} evento(s)` : ""}`,
+      onclick: () => { seleccion = seleccion === iso ? null : iso; pintarCalendario(); pintarDetalle(); },
+    }, String(d));
+    if (evs.length) celda.append(h("i", { class: "punto" }));
+    grid.append(celda);
+  }
+}
+
+function filaEvento(e) {
+  const f = dateDeISO(e.iso).toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+  return h("div", { class: "evento" },
+    h("div", { class: "fecha" }, f),
+    h("div", {},
+      h("div", { class: "titulo" }, String(e.titulo)),
+      e.descripcion ? h("div", { class: "desc" }, String(e.descripcion)) : null));
+}
+
+function pintarDetalle() {
+  const caja = $("#detalle");
+  caja.replaceChildren();
+  let lista, titulo, vacio;
+  if (seleccion) {
+    lista = eventosPorDia.get(seleccion) || [];
+    titulo = dateDeISO(seleccion).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+    vacio = "Sin eventos este día.";
+  } else {
+    lista = eventos.filter((e) => e.iso >= hoyISO).slice(0, 8);
+    titulo = "Próximos eventos";
+    vacio = "No hay eventos próximos.";
+  }
+  caja.append(h("div", { class: "detalle-titulo" }, titulo));
+  if (!lista.length) caja.append(h("div", { class: "vacio-msg" }, vacio));
+  else lista.forEach((e) => caja.append(filaEvento(e)));
+}
+
+/* ---------- Minifiguras ---------- */
+
+function urlFoto(valor) {
+  const v = String(valor == null ? "" : valor).trim();
+  if (!v) return "";
+  const m = v.match(/\/d\/([a-zA-Z0-9_-]{10,})/) || v.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=w600`;
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(v)) return `https://drive.google.com/thumbnail?id=${v}&sz=w600`; // ID suelto de Drive
+  return /^https?:\/\//i.test(v) ? v : "";
+}
+
+function marcador(nombre) {
+  return h("div", { class: "sin-foto" }, String(nombre).trim().charAt(0).toUpperCase() || "?");
+}
+
+function tarjetaFigura(f) {
+  const src = urlFoto(f.foto);
+  let media;
+  if (src) {
+    media = h("img", { class: "foto", src, alt: String(f.nombre), loading: "lazy", referrerpolicy: "no-referrer" });
+    media.addEventListener("error", () => media.replaceWith(marcador(f.nombre)));
+  } else {
+    media = marcador(f.nombre);
+  }
+  return h("div", { class: "figura" }, media,
+    h("div", { class: "info" },
+      h("div", { class: "fnombre" }, String(f.nombre)),
+      f.notas ? h("div", { class: "fnotas" }, String(f.notas)) : null));
+}
+
+function pintarFiguras() {
+  const filtro = $("#filtro").value.trim().toLowerCase();
+  const visibles = figuras.filter((f) => !filtro || String(f.nombre).toLowerCase().includes(filtro));
+  $("#figTitulo").textContent = `Minifiguras (${figuras.length})`;
+  const cont = $("#figuras");
+  cont.replaceChildren(...visibles.map(tarjetaFigura));
+  const vacio = $("#figurasVacio");
+  vacio.hidden = visibles.length > 0;
+  vacio.textContent = figuras.length ? "Ninguna minifigura coincide con la búsqueda." : "No hay minifiguras. Añade filas en la pestaña «Minifiguras» de la hoja.";
+}
+
+/* ---------- Carga y actualización ---------- */
+
+function pintar(datos) {
+  recursos = (datos.recursos || []).filter((r) => r && r.nombre !== "" && r.nombre != null);
+  figuras = (datos.minifiguras || []).filter((f) => f && f.nombre !== "" && f.nombre != null);
+  eventos = (datos.eventos || [])
+    .map((e) => ({ ...e, iso: normalizarFecha(e.fecha) }))
+    .filter((e) => e.iso && e.titulo)
+    .sort((a, b) => a.iso.localeCompare(b.iso) || String(a.titulo).localeCompare(String(b.titulo)));
+  eventosPorDia = new Map();
+  eventos.forEach((e) => {
+    if (!eventosPorDia.has(e.iso)) eventosPorDia.set(e.iso, []);
+    eventosPorDia.get(e.iso).push(e);
+  });
+  pintarRecursos();
+  pintarFiguras();
+  pintarCalendario();
+  pintarDetalle();
+}
+
+let ultimaFirma = null;
+let ultimaOk = null;
+let errorMsg = "";
+let cargando = false;
+
+async function cargar() {
+  if (cargando) return;
+  cargando = true;
+  try {
+    let datos;
+    if (DEMO) {
+      datos = DATOS_DEMO;
+    } else {
+      const url = API_URL + (API_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) throw new Error("respuesta HTTP " + resp.status);
+      let texto = await resp.text();
+      try { datos = JSON.parse(texto); }
+      catch (e) { throw new Error("la API no devolvió datos (revisa que el acceso sea «Cualquier usuario»)"); }
+      if (datos.ok === false) throw new Error(datos.error || "error en la API");
+    }
+    // Solo se repinta si algo ha cambiado.
+    const firma = JSON.stringify([datos.recursos, datos.minifiguras, datos.eventos]);
+    if (firma !== ultimaFirma) { ultimaFirma = firma; pintar(datos); }
+    ultimaOk = Date.now();
+    errorMsg = "";
+  } catch (err) {
+    console.error(err);
+    errorMsg = err.message || "error de conexión";
+  } finally {
+    cargando = false;
+    actualizarEstado();
+  }
+}
+
+function hace(ms) {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`;
+}
+
+function actualizarEstado() {
+  const punto = $("#estadoPunto"), texto = $("#estadoTexto");
+  if (DEMO) {
+    punto.className = "punto-estado demo";
+    texto.textContent = "Modo demostración";
+  } else if (errorMsg) {
+    punto.className = "punto-estado error";
+    texto.textContent = "Sin conexión: " + errorMsg + (ultimaOk ? ` · último dato hace ${hace(Date.now() - ultimaOk)}` : "");
+  } else if (ultimaOk) {
+    punto.className = "punto-estado ok";
+    texto.textContent = `Actualizado hace ${hace(Date.now() - ultimaOk)}`;
+  } else {
+    punto.className = "punto-estado";
+    texto.textContent = "Cargando…";
+  }
+}
+
+/* ---------- Arranque ---------- */
+
+document.title = TITULO;
+$("#titulo").textContent = TITULO;
+$("#avisoDemo").hidden = !DEMO;
+
+$("#mesAnterior").addEventListener("click", () => { vista = new Date(vista.getFullYear(), vista.getMonth() - 1, 1); pintarCalendario(); });
+$("#mesSiguiente").addEventListener("click", () => { vista = new Date(vista.getFullYear(), vista.getMonth() + 1, 1); pintarCalendario(); });
+$("#mesHoy").addEventListener("click", () => {
+  const n = new Date();
+  vista = new Date(n.getFullYear(), n.getMonth(), 1);
+  seleccion = null;
+  pintarCalendario(); pintarDetalle();
+});
+$("#filtro").addEventListener("input", pintarFiguras);
+
+pintarCalendario();
+pintarDetalle();
+cargar();
+setInterval(() => { if (!document.hidden) cargar(); }, SEGUNDOS_ENTRE_ACTUALIZACIONES * 1000);
+setInterval(actualizarEstado, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) cargar(); });
+</script>
+</body>
+</html>
