@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#171B27">
-<title>Lücr0nium</title>
+<title>Lücrønîum</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l11 13-11 13L5 16z' fill='none' stroke='%23C49B55' stroke-width='2.4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,10 +100,8 @@ input:hover,select:hover{border-color:var(--linea)}
 .punto{width:9px;height:9px;border-radius:50%;background:var(--txt2);flex:none}
 .punto.ok{background:var(--verde)}
 .punto.error{background:var(--rojo)}
-.punto.demo{background:var(--acento)}
 .aviso{padding:.55rem 1rem;text-align:center;font-size:.88rem;border-bottom:1px solid var(--linea-suave);background:var(--sup2);color:var(--txt2)}
 .aviso.error{background:color-mix(in srgb,var(--rojo) 24%,var(--fondo));color:var(--txt)}
-.aviso.demo{color:var(--acento-fuerte)}
 
 /* ============ Portada ============ */
 .vista{animation:aparece .4s ease both}
@@ -316,7 +314,7 @@ dialog::backdrop{background:rgba(8,10,16,.74)}
 <header class="barra">
   <a class="marca" href="#inicio" aria-label="Inicio">
     <span id="marcaLogo" class="marca-logo"><span class="sello"></span></span>
-    <span id="marcaNombre">Lücr0nium</span>
+    <span id="marcaNombre"></span>
   </a>
   <nav class="nav" aria-label="Secciones principales">
     <a href="#inicio" data-vista="inicio"><span data-ico="home"></span><span>Inicio</span></a>
@@ -326,7 +324,6 @@ dialog::backdrop{background:rgba(8,10,16,.74)}
   </nav>
   <div class="estado" id="estado" role="status"><span id="estadoPunto" class="punto"></span><span id="estadoTexto">Conectando…</span></div>
 </header>
-<p id="avisoDemo" class="aviso demo" hidden>Modo demostración: estás viendo datos de ejemplo. Pega la URL de la API en <code>API_URL</code> para conectar con la hoja de cálculo.</p>
 <p id="avisoError" class="aviso error" role="alert" hidden></p>
 
 <main>
@@ -374,16 +371,16 @@ dialog::backdrop{background:rgba(8,10,16,.74)}
     </div>
     <div class="portada-velo" aria-hidden="true"></div>
     <div class="portada-texto">
-      <h1 id="titulo">Lücr0nium</h1>
+      <h1 id="titulo"></h1>
       <div class="orn" aria-hidden="true"><span></span><i></i><span></span></div>
-      <p id="frase" class="frase">Crónicas, aventuras y leyendas de nuestra comunidad.</p>
+      <p id="frase" class="frase"></p>
     </div>
   </div>
 
   <section class="bloque" aria-labelledby="cronicasTitulo">
     <div class="contenedor">
       <header class="cab">
-        <h2 id="cronicasTitulo">Crónicas de Lücr0nium</h2>
+        <h2 id="cronicasTitulo"></h2>
         <div class="orn" aria-hidden="true"><span></span><i></i><span></span></div>
       </header>
       <ol class="linea" id="cronologia"></ol>
@@ -393,7 +390,7 @@ dialog::backdrop{background:rgba(8,10,16,.74)}
 
   <section class="bloque" aria-labelledby="presentacionTitulo">
     <div class="contenedor presentacion">
-      <h2 id="presentacionTitulo">Sobre Lücr0nium</h2>
+      <h2 id="presentacionTitulo"></h2>
       <div class="orn" aria-hidden="true"><span></span><i></i><span></span></div>
       <p id="presentacion"></p>
     </div>
@@ -574,8 +571,6 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzfLh8Z5Vqxfm725PWA7jkk
 const SEGUNDOS_ENTRE_ACTUALIZACIONES = 20;
 const TITULO = "Lücrønîum";
 const FRASE = "Conoce nuestro grupo de rol en Logroño.";
-const PRESENTACION = "Lücrønîum es nuestro pequeño rincón dedicado a las aventuras, recuerdos y experiencias que compartimos alrededor de una mesa. Aquí guardamos nuestros recuerdos, organizamos nuestras partidas y gestionamos todo lo que forma parte de nuestra comunidad. Solemos jugar D&D con dos campañas activas y ten candles los domingos.";
-const DEMO = API_URL.startsWith("PEGA_AQUI"); 
 
 /* ============ Utilidades ============ */
 const $ = (s, r = document) => r.querySelector(s);
@@ -767,65 +762,6 @@ const colorRareza = (r) => COLOR_RAREZA[norm(r)] || "var(--txt2)";
 const RANGO = ["comun", "poco comun", "rara", "muy rara", "epica", "legendaria"];
 const rango = (v) => { const i = RANGO.indexOf(norm(v)); return i < 0 ? 99 : i; };
 
-/* ============ Datos de demostración (mismo formato que la API) ============ */
-function DATOS_DEMO() {
-  const dia = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return fechaISO(d); };
-  return {
-    ok: true,
-    ajustes: [],
-    recursos: [
-      { nombre: "Miniaturas", valor: 24, unidad: "figuras", icono: "figura", descripcion: "Colección total (datos de ejemplo)" },
-      { nombre: "Dados", valor: 18, unidad: "", icono: "dado" },
-      { nombre: "Campañas activas", valor: 3, unidad: "", icono: "bandera" },
-      { nombre: "Miembros", valor: 6, unidad: "", icono: "grupo" },
-      { nombre: "Objetos mágicos", valor: 9, unidad: "", icono: "pergamino" }
-    ],
-    movimientos: [
-      { fecha: dia(-120), concepto: "Saldo inicial", cantidad: 1000, tipo: "Ajuste", usuario: "Administrador de ejemplo" },
-      { fecha: dia(-60), concepto: "Cuotas de octubre", cantidad: 150, tipo: "Ingreso", usuario: "Editor de ejemplo" },
-      { fecha: dia(-45), concepto: "Miniatura de dragón", cantidad: 120, tipo: "Gasto", usuario: "Editor de ejemplo" },
-      { fecha: dia(-30), concepto: "Rifa del grupo", cantidad: 300, tipo: "Ingreso", usuario: "Administrador de ejemplo" },
-      { fecha: dia(-20), concepto: "Alquiler del local del torneo", cantidad: 180, tipo: "Gasto", usuario: "Administrador de ejemplo" },
-      { fecha: dia(-8), concepto: "Cuotas de noviembre", cantidad: 150, tipo: "Ingreso", usuario: "Editor de ejemplo" },
-      { fecha: dia(-3), concepto: "Pizzas de la sesión", cantidad: 50, tipo: "Gasto", usuario: "Editor de ejemplo" }
-    ],
-    minifiguras: [
-      { nombre: "Dragón rojo adulto", foto: "", descripcion: "Miniatura grande para los encuentros finales de campaña.", categoria: "Dragones", rareza: "Legendaria", propietario: "Miembro 1", estado: "Disponible", fecha_adquisicion: dia(-300), precio: 85, valor_estimado: 120, notas: "Datos de ejemplo." },
-      { nombre: "Trasgo explorador", foto: "", descripcion: "Pequeño y barato, ideal para emboscadas.", categoria: "Humanoides", rareza: "Común", propietario: "Miembro 2", estado: "Disponible", fecha_adquisicion: dia(-200), precio: 4, valor_estimado: 6 },
-      { nombre: "Esqueleto guerrero", foto: "", descripcion: "Pintado con tonos de hueso envejecido.", categoria: "No muertos", rareza: "Común", propietario: "Miembro 3", estado: "Prestada", fecha_adquisicion: dia(-180), precio: 5, valor_estimado: 7 },
-      { nombre: "Contemplador", foto: "", descripcion: "Un ojo flotante con muchas sorpresas.", categoria: "Aberraciones", rareza: "Muy rara", propietario: "Miembro 1", estado: "Disponible", fecha_adquisicion: dia(-90), precio: 40, valor_estimado: 55 },
-      { nombre: "Elfa exploradora", foto: "", descripcion: "Personaje de jugadora con arco largo.", categoria: "Personajes", rareza: "Poco común", propietario: "Miembro 4", estado: "Disponible", fecha_adquisicion: dia(-150), precio: 12, valor_estimado: 15 },
-      { nombre: "Lobo gris", foto: "", descripcion: "Compañero animal para druidas y montaraces.", categoria: "Bestias", rareza: "Común", propietario: "Miembro 2", estado: "En reparación", fecha_adquisicion: dia(-240), precio: 7, valor_estimado: 9 },
-      { nombre: "Mímico", foto: "", descripcion: "Parece un cofre. No lo es.", categoria: "Monstruos", rareza: "Rara", propietario: "Miembro 5", estado: "Disponible", fecha_adquisicion: dia(-60), precio: 18, valor_estimado: 25 },
-      { nombre: "Liche", foto: "", descripcion: "Jefe de mazmorra, base con detalles dorados.", categoria: "No muertos", rareza: "Legendaria", propietario: "Miembro 6", estado: "Perdida", fecha_adquisicion: dia(-400), precio: 60, valor_estimado: 80 }
-    ],
-    eventos: [
-      { fecha: dia(2), titulo: "Sesión de la campaña principal", descripcion: "Continuamos en las ruinas del templo.", hora_inicio: "20:00", hora_fin: "23:30", ubicacion: "Casa de un miembro (ejemplo)", organizador: "Miembro 1", participantes: "Miembro 1, Miembro 2, Miembro 3, Miembro 4", categoria: "Sesión de rol", notas: "Traer dados y hojas de personaje." },
-      { fecha: dia(5), titulo: "Reunión del grupo", descripcion: "Repaso de la tesorería y próximas compras.", hora_inicio: "19:00", hora_fin: "20:00", ubicacion: "Videollamada", organizador: "Miembro 2", categoria: "Reunión del grupo" },
-      { fecha: dia(5), titulo: "Pintura de miniaturas", descripcion: "Tarde de pincel y paciencia.", hora_inicio: "17:00", ubicacion: "Tienda de ejemplo", organizador: "Miembro 3", categoria: "Compra o actividad" },
-      { fecha: dia(12), titulo: "Torneo de dados", descripcion: "Eliminatorias con premios simbólicos.", hora_inicio: "18:00", hora_fin: "21:00", ubicacion: "Local de ejemplo", organizador: "Miembro 4", categoria: "Torneo" },
-      { fecha: dia(20), titulo: "Aniversario de Lücr0nium", descripcion: "Celebración con cena y partida corta.", hora_inicio: "21:00", categoria: "Evento especial" },
-      { fecha: dia(-10), titulo: "Sesión cero de la nueva campaña", descripcion: "Creación de personajes.", hora_inicio: "20:00", hora_fin: "22:30", categoria: "Sesión de rol" }
-    ],
-    cronicas: [
-      { fecha: dia(-760), titulo: "Fundación de Lücr0nium", descripcion: "Un puñado de amigos decide dar nombre a su mesa de juego.", categoria: "Fundación" },
-      { fecha: dia(-730), titulo: "Primera partida", descripcion: "Una mazmorra pequeña, muchos dados y ninguna regla recordada del todo.", categoria: "Partida" },
-      { fecha: dia(-420), titulo: "Inicio de la primera campaña", descripcion: "Comienza la gran aventura que ocupará los próximos meses.", categoria: "Campaña" },
-      { fecha: dia(-150), titulo: "Se unen nuevos miembros", descripcion: "La mesa crece y hay que buscar sillas.", categoria: "Comunidad" }
-    ],
-    editores: [
-      { nombre: "Administrador de ejemplo", rol: "Administrador", enlace: "", estado: "Activo", foto: "" },
-      { nombre: "Editor de ejemplo", rol: "Editor", enlace: "", estado: "Activo", foto: "" }
-    ],
-    archivos: [
-      { nombre: "Reglas de la casa", carpeta: "Documentos", enlace: "", fecha: dia(-200), tamano: "120 KB", descripcion: "Documento de ejemplo" },
-      { nombre: "Mapa del reino", carpeta: "Campañas", enlace: "", fecha: dia(-100), tamano: "2,4 MB" },
-      { nombre: "Cartel del torneo", carpeta: "Imágenes", enlace: "", fecha: dia(-14), tamano: "850 KB" },
-      { nombre: "Fotos de miniaturas", carpeta: "Figuritas", enlace: "", fecha: dia(-30), tamano: "14 MB" }
-    ]
-  };
-}
-
 /* ============ Estado en memoria ============ */
 let ajustes = {}, recursos = [], movimientos = [], figuras = [], eventos = [], cronicas = [], editores = [], archivos = [];
 let eventosPorDia = new Map();
@@ -850,7 +786,7 @@ function aplicarAjustes(filas) {
   $("#titulo").textContent = nombre;
   $("#marcaNombre").textContent = nombre;
   $("#frase").textContent = ajustes.frase || FRASE;
-  $("#presentacion").textContent = ajustes.descripcion || PRESENTACION;
+  $("#presentacion").textContent = ajustes.descripcion || "";
   $("#cronicasTitulo").textContent = `Crónicas de ${nombre}`;
   $("#presentacionTitulo").textContent = `Sobre ${nombre}`;
   $("#figTitulo").textContent = `Bestiario de ${nombre}`;
@@ -1282,8 +1218,7 @@ function actualizarEstado() {
   const p = $("#estadoPunto"), t = $("#estadoTexto");
   p.className = "punto";
   let texto;
-  if (DEMO) { p.classList.add("demo"); texto = "Modo demostración"; }
-  else if (errorMsg) { p.classList.add("error"); texto = ultimaOk ? "Sin conexión" : "Error de conexión"; }
+  if (errorMsg) { p.classList.add("error"); texto = ultimaOk ? "Sin conexión" : "Error de conexión"; }
   else if (ultimaOk) { p.classList.add("ok"); texto = "Actualizado " + ultimaOk.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
   else texto = "Conectando…";
   t.textContent = texto;
@@ -1301,22 +1236,18 @@ async function cargar() {
   cargando = true;
   try {
     let datos;
-    if (DEMO) {
-      datos = DATOS_DEMO();
-    } else {
-      const ctl = new AbortController();
-      const corte = setTimeout(() => ctl.abort(), 15000);
-      let resp;
-      try {
-        resp = await fetch(API_URL + (API_URL.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store", signal: ctl.signal });
-      } catch (e) {
-        throw new Error("No hay conexión con la API (comprueba la URL y que el acceso sea «Cualquier usuario»)");
-      } finally { clearTimeout(corte); }
-      if (!resp.ok) throw new Error("La API respondió con el error HTTP " + resp.status);
-      try { datos = await resp.json(); }
-      catch (e) { throw new Error("La API no devolvió datos válidos (¿el acceso está en «Cualquier usuario»?)"); }
-      if (!datos || datos.ok === false) throw new Error((datos && datos.error) || "La API no devolvió datos");
-    }
+    const ctl = new AbortController();
+    const corte = setTimeout(() => ctl.abort(), 15000);
+    let resp;
+    try {
+      resp = await fetch(API_URL + (API_URL.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store", signal: ctl.signal });
+    } catch (e) {
+      throw new Error("No hay conexión con la API (comprueba la URL y que el acceso sea «Cualquier usuario»)");
+    } finally { clearTimeout(corte); }
+    if (!resp.ok) throw new Error("La API respondió con el error HTTP " + resp.status);
+    try { datos = await resp.json(); }
+    catch (e) { throw new Error("La API no devolvió datos válidos (¿el acceso está en «Cualquier usuario»?)"); }
+    if (!datos || datos.ok === false) throw new Error((datos && datos.error) || "La API no devolvió datos");
     datosActuales = datos;
     pintar(datos);
     ultimaOk = new Date();
@@ -1343,10 +1274,19 @@ function ir() {
 
 /* ============ Arranque ============ */
 document.querySelectorAll("[data-ico]").forEach((el) => el.replaceWith(ico(el.dataset.ico)));
+
+// Valores predeterminados visibles desde el primer arranque, antes de cargar Google Sheets.
 document.title = TITULO;
-$("#presentacion").textContent = PRESENTACION;
+$("#titulo").textContent = TITULO;
+$("#marcaNombre").textContent = TITULO;
+$("#frase").textContent = FRASE;
+$("#cronicasTitulo").textContent = `Crónicas de ${TITULO}`;
+$("#presentacionTitulo").textContent = `Sobre ${TITULO}`;
+$("#figTitulo").textContent = `Bestiario de ${TITULO}`;
+$("#editoresTitulo").textContent = `Editores de ${TITULO}`;
+$("#presentacion").textContent = "";
+
 $("#cfgFrecuencia").textContent = `La web consulta la hoja cada ${SEGUNDOS_ENTRE_ACTUALIZACIONES} segundos`;
-if (DEMO) $("#avisoDemo").hidden = false;
 
 $("#mesAnterior").addEventListener("click", () => mover(-1));
 $("#mesSiguiente").addEventListener("click", () => mover(1));
